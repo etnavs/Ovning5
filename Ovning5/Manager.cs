@@ -31,7 +31,7 @@
             Console.WriteLine("1. Search on regno");
             Console.WriteLine("2. Seed Vehicles");
             Console.WriteLine("3. Print vehicles");
-            Console.WriteLine("4. Park vehicles");
+            Console.WriteLine("4. Park a vehicle");
             Console.WriteLine("0. Exit");
 
             var input = Console.ReadLine();
@@ -47,6 +47,9 @@
                 case "3":
                     PrintVehicles();
                     break;
+                case "4":
+                    ParkVehicles();
+                    break;
                 case "0":
                     Environment.Exit(0);
                     break;
@@ -54,6 +57,54 @@
                     Console.WriteLine("Wrong input!");
                     break;
             }
+        }
+
+        private void ParkVehicles()
+        {
+            if (garage == null)
+            {
+                Console.WriteLine("Garage has not been initialized.");
+                return;
+            }
+            Console.WriteLine("Which type of vehicle?");
+            Console.WriteLine("1. Car");
+            Console.WriteLine("0. Main Menu");
+
+            var input = Console.ReadLine();
+
+            switch (input)
+            {
+                case "1":
+                    ParkCar();
+                    break;
+                case "0":
+                    return;
+                default:
+                    Console.WriteLine("Wrong input!");
+                    break;
+
+            }
+        }
+
+        private void ParkCar()
+        {
+            if (garage == null)
+            {
+                Console.WriteLine("Garage has not been initialized.");
+                return;
+            }
+            Console.WriteLine("Number of wheels?");
+            int nrOfWh = int.Parse(Console.ReadLine());
+
+            Console.WriteLine("Colour?");
+            string col = Console.ReadLine();
+
+            Console.WriteLine("Registration number?");
+            string reg = Console.ReadLine().ToUpper();
+
+            var car = new Vehicle(nrOfWheels: nrOfWh, color: col, regNo: reg);
+
+            garage.Park(car);
         }
 
         private void SeedVehicles()
@@ -81,15 +132,33 @@
         private void GetVehicleByRegNo()
         {
             //Fråga efter regnummer att söka på
-            var regNo = "ABC123";
+            Console.WriteLine("Registration number of car?");
+            string regNo = Console.ReadLine().ToUpper();
+
+            bool found = false;
+
+            //var regNo = "ABC123";
             foreach (var vehicle in garage)
             {
                 if(vehicle.RegNo == regNo)
                 {
                     Console.WriteLine($"Vehicle with {vehicle.RegNo} was found");
+                    Console.WriteLine($"It is a {vehicle.Color} car with {vehicle.NrOfWheels} wheels");
+                    //Console.WriteLine($"Parked in space number {??}");
+                    found = true;
                     break;
                 }
+
+                
             }
+            
+           if (!found)
+            {
+                Console.WriteLine($"Vehicle with {regNo} was NOT found");
+            }
+              
+           
+            
 
             //var res = garage.FirstOrDefault(v => v.RegNo == regNo);
         }
