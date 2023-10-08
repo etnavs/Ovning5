@@ -24,7 +24,7 @@ namespace Ovning5
         {
             //Hitta första tomma platsen
             //Parkera fordonet på den platsen!
-            //Returnera true om det går bra annrs false
+            //Returnera true om det går bra annars false
 
             for (int i = 0; i < spots.Length; i++)
             {
@@ -40,6 +40,30 @@ namespace Ovning5
             Console.WriteLine("Garage is full. Cannot park the vehicle.");
 
         }
+
+        internal void Remove(string regNo)
+        {
+            bool found = false;
+            for (int i = 0; i < spots.Length; i++)
+            {
+                if (spots[i] != null && spots[i].RegNo == regNo)
+                {
+                    Console.WriteLine($"Removed vehicle with RegNo: {regNo} from spot {i + 1}");
+                    spots[i] = null; // Sätt platsen till null för att ta bort fordonet
+                    found = true;
+                    break;
+
+                }
+               
+            }
+            if (!found)
+            {
+                Console.WriteLine($"Vehicle with RegNo: {regNo} was NOT found in the garage.");
+               
+            }
+                
+        }
+
 
         IEnumerator IEnumerable.GetEnumerator()
         {
