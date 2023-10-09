@@ -48,6 +48,7 @@ namespace Ovning5
             {
                 if (spots[i] != null && spots[i].RegNo == regNo)
                 {
+
                     Console.WriteLine($"Removed vehicle with RegNo: {regNo} from spot {i + 1}");
                     spots[i] = null; // Sätt platsen till null för att ta bort fordonet
                     found = true;
@@ -56,7 +57,7 @@ namespace Ovning5
                 }
                
             }
-            if (!found)
+            if (!found) // Fordonet hittas inte i garaget
             {
                 Console.WriteLine($"Vehicle with RegNo: {regNo} was NOT found in the garage.");
                
