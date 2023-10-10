@@ -1,4 +1,6 @@
-﻿namespace Ovning5
+﻿using System.Drawing;
+
+namespace Ovning5
 {
     internal class Manager
     {
@@ -33,6 +35,7 @@
             Console.WriteLine("4. Park a vehicle");
             Console.WriteLine("5. Pick up a vehicle");
             Console.WriteLine("6. Search vehicle with properties");
+            Console.WriteLine("7. List number of different vehicles");
             Console.WriteLine("0. Exit");
 
             var input = Console.ReadLine();
@@ -58,6 +61,9 @@
                 case "6":
                     SearchProperties();
                     break;
+                case "7":
+                    NumberOfDifferentVehicles();
+                    break;
                 case "0":
                     Environment.Exit(0);
                     break;
@@ -67,15 +73,86 @@
             }
         }
 
-        private void SearchProperties()  // Sök fordon efter egenskaper
+        private void NumberOfDifferentVehicles() // Hur många av varje fordon finns det?
         {
-            throw new NotImplementedException();
+            // Också med hjälp av ChatGPT
+            var vehicleCounts = garage.GroupBy(vehicle => vehicle.GetType().Name)
+        .Select(group => new
+        {
+            VehicleType = group.Key, // Fordonstypen
+            Count = group.Count() // Antalet fordon i typen
+        });
+
+            Console.WriteLine("Vehicle counts:");
+
+            foreach (var count in vehicleCounts)
+            {
+                Console.WriteLine($"{count.VehicleType}: {count.Count}");
+            }
         }
+
+        private void SearchProperties() // Sök fordon efter egenskaper
+        {
+            Console.WriteLine("What properties are you searching for?");
+            Console.WriteLine("Press enter on not valid properties.");
+
+            Console.WriteLine("Number of wheels?");
+            int? nrOfWh = TryParseInt(Console.ReadLine());
+
+            Console.WriteLine("Colour?");
+            string col = Console.ReadLine();
+
+            Console.WriteLine("Brand?");
+            string bra = Console.ReadLine();
+
+            Console.WriteLine("Wingspan?");
+            int? wingsp = TryParseInt(Console.ReadLine());
+
+            Console.WriteLine("Length?");
+            int? len = TryParseInt(Console.ReadLine());
+
+            Console.WriteLine("Horsepowers?");
+            int? horsep = TryParseInt(Console.ReadLine());
+
+            // Det här tack vare ChatGPT
+            var matchingVehicles = garage.Where(vehicle =>
+                (!nrOfWh.HasValue || vehicle.NrOfWheels == nrOfWh.Value) &&
+                (string.IsNullOrWhiteSpace(col) || vehicle.Color.Equals(col, StringComparison.OrdinalIgnoreCase)) &&
+                (string.IsNullOrWhiteSpace(bra) || (vehicle is Car car && car.Brand.Equals(bra, StringComparison.OrdinalIgnoreCase))) &&
+                (!wingsp.HasValue || (vehicle is Airplane airplane && airplane.Wingspan == wingsp.Value)) &&
+                (!len.HasValue || (vehicle is Boat boat && boat.Boatlength == len.Value)) &&
+                (!horsep.HasValue || (vehicle is Motorcycle motorcycle && motorcycle.Horsepowers == horsep.Value)));
+
+            if (matchingVehicles.Any())
+            {
+                Console.WriteLine("Matching vehicles found:");
+                foreach (var vehicle in matchingVehicles)
+                {
+                    Console.WriteLine($"Registration Number: {vehicle.RegNo} " +
+                    $"\tColor: {vehicle.Color} " +
+                    $"\tNumber of Wheels: {vehicle.NrOfWheels}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No matching vehicles found.");
+            }
+        }
+
+        private int? TryParseInt(string input)
+        {
+            if (int.TryParse(input, out int value))
+            {
+                return value;
+            }
+            return null;
+        }
+
 
         private void PickUpVehicles()
         {
             // Plocka ut ett fordon ur garaget med registreringsnummer
-            Console.WriteLine("Licence number of vehicle to pick up?");
+            Console.WriteLine("Registration number of vehicle to pick up?");
             string regNo = Console.ReadLine().ToUpper();
 
             //Ta bort från garage
@@ -200,18 +277,20 @@
         {
 
             // Skapa tre instanser av Vehicle med olika egenskaper
-            var car1 = new Car(nrOfWheels: 4, color: "Red", regNo: "ABC123", brand: "Nissan");
-            var airplane1 = new Airplane(nrOfWheels: 3, color: "Green", regNo: "DEF789", wingspan: 15);
-            var boat1 = new Boat(nrOfWheels: 0, color: "Blue", regNo: "XYZ456", boatlength: 8);
+            Car car1 = new Car(nrOfWheels: 4, color: "Red", regNo: "ABC123", brand: "Nissan");
+            Airplane airplane1 = new Airplane(nrOfWheels: 3, color: "Green", regNo: "DEF789", wingspan: 15);
+            Boat boat1 = new Boat(nrOfWheels: 0, color: "Blue", regNo: "XYZ456", boatlength: 8);
+            Motorcycle motorcycle1 = new Motorcycle(nrOfWheels: 2, color: "White", regNo: "RRR321", horsepowers: 54);
 
             // Anropa Park-metoden för att parkera bilarna i garaget
             garage.Park(car1);
             garage.Park(airplane1);
             garage.Park(boat1);
-
-
+            garage.Park(motorcycle1);
 
         }
+
+
 
         private void GetVehicleByRegNo()
         {
@@ -277,7 +356,7 @@
                 Console.WriteLine($"Registration Number: {vehicle.RegNo} " +
                     $"\tColor: {vehicle.Color} " +
                     $"\tNumber of Wheels: {vehicle.NrOfWheels}");
-                
+
             }
         }
 
