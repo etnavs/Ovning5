@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics.Metrics;
+using System.Drawing;
+using System.Threading.Channels;
 
 namespace Ovning5
 {
@@ -44,7 +46,7 @@ namespace Ovning5
             {
                 // Ta emot input
                 case "1":
-                    GetVehicleByRegNo();
+                    SearchOnREgNo();
                     break;
                 case "2":
                     SeedVehicles();
@@ -73,6 +75,27 @@ namespace Ovning5
             }
         }
 
+        private void SearchOnREgNo()
+        {
+            Console.WriteLine("Registration number of vehicle?");
+            string regNo = Console.ReadLine()!.ToUpper();
+
+
+            var vehicle = GetVehicleByRegNo(regNo);
+
+
+            if (vehicle != null)
+            {
+                Console.WriteLine($"Vehicle with {vehicle.RegNo} was found");
+                Console.WriteLine($"It is a {vehicle.Color} {vehicle.GetType().Name} with {vehicle.NrOfWheels} wheels");
+
+            }
+            else
+            {
+                Console.WriteLine($"Vehicle with {regNo} was NOT found");
+            }
+        }
+
         private void NumberOfDifferentVehicles() // Hur många av varje fordon finns det?
         {
             // Också med hjälp av ChatGPT
@@ -82,6 +105,14 @@ namespace Ovning5
             VehicleType = group.Key, // Fordonstypen
             Count = group.Count() // Antalet fordon i typen
         });
+
+            var res = garage.GroupBy(vehicle => vehicle.GetType().Name)
+                            .Select(group => $"{group.Key}: {group.Count()}");
+                                      // .ToList().ForEach(r => Console.WriteLine(r));
+            foreach ( var str in res ) 
+            {
+                Console.WriteLine(str);
+            }
 
             Console.WriteLine("Vehicle counts:");
 
@@ -97,7 +128,7 @@ namespace Ovning5
             Console.WriteLine("Press enter on not valid properties.");
 
             Console.WriteLine("Number of wheels?");
-            int? nrOfWh = TryParseInt(Console.ReadLine());
+            int? nrOfWh = TryParseInt(Console.ReadLine()!);
 
             Console.WriteLine("Colour?");
             string col = Console.ReadLine();
@@ -164,6 +195,8 @@ namespace Ovning5
 
         private void ParkVehicles() // Parkera ett fordon i garaget
         {
+            if(garage.IsFull)
+                Console.WriteLine("Garage is full no spots left");
 
             Console.WriteLine("Which type of vehicle?");
             Console.WriteLine("1. Car");
@@ -262,8 +295,25 @@ namespace Ovning5
             Console.WriteLine("Colour?");
             string col = Console.ReadLine();
 
-            Console.WriteLine("Registration number?");
-            string reg = Console.ReadLine().ToUpper();
+            bool success = false;
+            string reg;
+            do
+            {
+                Console.WriteLine("Registration number?");
+                reg = Console.ReadLine()!.ToUpper();
+                var parked = GetVehicleByRegNo(reg);
+
+                if (parked != null)
+                {
+                    Console.WriteLine("RegNo is already parked");
+                }
+                else
+                {
+                    success = true;
+                }
+
+            } while (!success);
+
 
             Console.WriteLine("Brand?");
             string bra = Console.ReadLine();
@@ -292,57 +342,71 @@ namespace Ovning5
 
 
 
-        private void GetVehicleByRegNo()
+        private Vehicle? GetVehicleByRegNo(string regNo)
         {
             //Fråga efter regnummer att söka på
-            Console.WriteLine("Registration number of vehicle?");
-            string regNo = Console.ReadLine().ToUpper();
-
-            bool found = false;
-
-            foreach (var vehicle in garage)
-            {
-                if (vehicle.RegNo == regNo)
-                {
-
-                    // Avgör vilken sort fordonet är.
-                    string vehic = "vehicle";
-                    if (vehicle is Car)
-                    {
-                        vehic = "car";
-                    }
-                    if (vehicle is Airplane)
-                    {
-                        vehic = "airplane";
-                    }
-                    if (vehicle is Boat)
-                    {
-                        vehic = "boat";
-                    }
-                    if (vehicle is Motorcycle)
-                    {
-                        vehic = "motorcycle";
-                    }
-
-                    // Skriv om fordonet hittas och dess egenskaper.
-
-                    Console.WriteLine($"Vehicle with {vehicle.RegNo} was found");
-                    Console.WriteLine($"It is a {vehicle.Color} {vehic} with {vehicle.NrOfWheels} wheels");
-
-                    // Hur skriver jag ut vilken plats fordonet är parkerat på?
-                    // Console.WriteLine($"Parked in space number {??}");
-                    found = true;
-                    break;
-                }
+            //Console.WriteLine("Registration number of vehicle?");
+            //string regNo = Console.ReadLine()!.ToUpper();
 
 
-            }
+            return garage.FirstOrDefault(v => v.RegNo == regNo);
 
-            //Om fordonet inte hittas.
-            if (!found)
-            {
-                Console.WriteLine($"Vehicle with {regNo} was NOT found");
-            }
+            //if(vehicle != null)
+            //{
+            //    Console.WriteLine($"Vehicle with {vehicle.RegNo} was found");
+            //    Console.WriteLine($"It is a {vehicle.Color} {vehicle.GetType().Name} with {vehicle.NrOfWheels} wheels");
+
+            //}
+            //else
+            //{
+            //    Console.WriteLine($"Vehicle with {regNo} was NOT found");
+            //}
+
+            //bool found = false;
+
+            //foreach (var vehicle in garage)
+            //{
+            //    if (vehicle.RegNo == regNo)
+            //    {
+
+            //        //// Avgör vilken sort fordonet är.
+            //        //string vehic = "vehicle";
+            //        //if (vehicle is Car)
+            //        //{
+            //        //    vehic = "car";
+            //        //}
+            //        //if (vehicle is Airplane)
+            //        //{
+            //        //    vehic = "airplane";
+            //        //}
+            //        //if (vehicle is Boat)
+            //        //{
+            //        //    vehic = "boat";
+            //        //}
+            //        //if (vehicle is Motorcycle)
+            //        //{
+            //        //    vehic = "motorcycle";
+            //        //}
+
+            //        // Skriv om fordonet hittas och dess egenskaper.
+
+            //        Console.WriteLine($"Vehicle with {vehicle.RegNo} was found");
+            //        Console.WriteLine($"It is a {vehicle.Color} {vehicle.GetType().Name} with {vehicle.NrOfWheels} wheels");
+
+            //        // Hur skriver jag ut vilken plats fordonet är parkerat på?
+            //        // Console.WriteLine($"Parked in space number {??}");
+            //        found = true;
+            //        break;
+            //    }
+
+
+            //}
+
+            ////Om fordonet inte hittas.
+            //if (!found)
+            //{
+            //    Console.WriteLine($"Vehicle with {regNo} was NOT found");
+            //}
 
 
         }
@@ -385,9 +449,16 @@ namespace Ovning5
                 }
             }
 
-            var li = new List<Vehicle>();
+            // var li = new List<Vehicle>();
 
             garage = new Garage<Vehicle>(capacity);
+            //IEnumerable<Vehicle> vehicles = garage;
+            //IEnumerable<string> strings = new string[23];
+
+            //foreach (var item in strings)
+            //{
+            //    Console.WriteLine(item);
+            //}
 
             Console.WriteLine($"Garage with {capacity} parking spaces created.");
         }
